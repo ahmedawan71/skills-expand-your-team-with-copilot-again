@@ -18,12 +18,26 @@ def hash_password(password):
     return ph.hash(password)
 
 def init_database():
-    """Initialize database if empty"""
+    """Initialize the database with sample data."""
 
-    # Initialize activities if empty
-    if activities_collection.count_documents({}) == 0:
-        for name, details in initial_activities.items():
-            activities_collection.insert_one({"_id": name, **details})
+    # Initialize activities that are not already in the database
+    for name, details in initial_activities.items():
+        activities_collection.update_one(
+            {"_id": name},
+            {"$setOnInsert": details},
+            upsert=True
+        )
+
+    manga_maniacs = initial_activities["Manga Maniacs"]
+    activities_collection.update_one(
+        {"_id": "Manga Maniacs"},
+        {"$set": {
+            "schedule": manga_maniacs["schedule"],
+            "schedule_details.days": manga_maniacs["schedule_details"]["days"],
+            "schedule_details.start_time": manga_maniacs["schedule_details"]["start_time"],
+            "max_participants": manga_maniacs["max_participants"],
+        }}
+    )
             
     # Initialize teacher accounts if empty
     if teachers_collection.count_documents({}) == 0:
@@ -97,6 +111,16 @@ initial_activities = {
         },
         "max_participants": 15,
         "participants": ["amelia@mergington.edu", "harper@mergington.edu"]
+    },
+    "Manga Maniacs": {
+        "description": "Explore the fantastic stories of the most interesting characters from Japanese Manga (graphic novels).",
+        "schedule": "Tuesdays, 5:00 PM",
+        "schedule_details": {
+            "days": ["Tuesday"],
+            "start_time": "17:00"
+        },
+        "max_participants": 25,
+        "participants": []
     },
     "Drama Club": {
         "description": "Act, direct, and produce plays and performances",
@@ -186,4 +210,3 @@ initial_teachers = [
         "role": "admin"
     }
 ]
-

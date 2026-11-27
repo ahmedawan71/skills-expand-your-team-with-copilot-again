@@ -281,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Format schedule for display - handles both old and new format
   function formatSchedule(details) {
     // If schedule_details is available, use the structured data
-    if (details.schedule_details) {
+    if (details.schedule_details && details.schedule_details.end_time) {
       const days = details.schedule_details.days.join(", ");
 
       // Convert 24h time format to 12h AM/PM format for display
@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return `${days}, ${startTime} - ${endTime}`;
     }
 
-    // Fallback to the string format if schedule_details isn't available
+    // Fall back to the schedule string when no end time is available
     return details.schedule;
   }
 
